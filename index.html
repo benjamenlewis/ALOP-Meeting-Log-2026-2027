@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALOP Meeting Log</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&display=swap');
+  :root {
+    --ink:#1B2528; --slate:#2E3A3F; --slate-soft:#46555B; --mist:#EDF0EF;
+    --paper:#F7F8F7; --line:#D8DEDC; --bus:#FFC233; --bus-deep:#E8A800;
+    --good:#2E7D52; --warn:#B3541E; --warn-bg:#FBEADE;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font-family:system-ui,-apple-system,sans-serif; }
+  .wrap { max-width:560px; margin:0 auto; min-height:100vh; }
+  header { background:var(--slate); border-bottom:4px solid var(--bus); padding:20px 20px 14px; }
+  header h1 { font-family:'Archivo',sans-serif; font-weight:800; font-size:20px; color:#fff; margin:0; }
+  header p { font-size:13px; color:#B9C6C4; margin:2px 0 0; }
+  main { padding:20px; }
+  .card { background:#fff; border:1.5px solid var(--line); border-radius:16px; padding:16px;
+    box-shadow:0 1px 3px rgba(27,37,40,.06); }
+  .card h2 { font-family:'Archivo',sans-serif; font-weight:700; font-size:15px; color:var(--slate); margin:0 0 10px; }
+  textarea#recap { width:100%; border:none; outline:none; resize:vertical; min-height:170px;
+    font-size:16px; line-height:27px; font-family:inherit; color:var(--ink);
+    background:repeating-linear-gradient(#fff,#fff 26px,var(--mist) 27px); }
+  .row { display:flex; gap:10px; margin-top:12px; }
+  button { font-family:inherit; cursor:pointer; }
+  .btn { border:none; border-radius:14px; padding:13px 18px; font-weight:700; font-size:15px; }
+  .btn-primary { background:var(--slate); color:#fff; flex:1; }
+  .btn-primary:disabled { opacity:.6; cursor:default; }
+  .btn-mic { background:var(--bus); color:var(--ink); display:flex; align-items:center; gap:8px; }
+  .btn-mic.live { background:var(--warn); color:#fff; }
+  .btn-mic .dot { width:10px; height:10px; border-radius:5px; background:currentColor; }
+  .btn-mic.live .dot { animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+  .btn-save { background:var(--good); color:#fff; flex:1; }
+  .btn-save:disabled { background:var(--line); cursor:default; }
+  .btn-ghost { background:#fff; border:1.5px solid var(--line); color:var(--slate); }
+  .tip { font-size:13px; color:var(--slate); margin-top:10px; background:var(--mist);
+    padding:10px 12px; border-radius:10px; line-height:1.5; }
+  .err { color:var(--warn); font-size:14px; font-weight:600; margin-top:14px; }
+  .field { margin-bottom:22px; }
+  .label { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .label span.t { font-family:'Archivo',sans-serif; font-weight:700; font-size:13px;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--slate); }
+  .needs { font-size:11px; font-weight:700; color:var(--warn); background:var(--warn-bg);
+    padding:2px 8px; border-radius:10px; }
+  .chips { display:flex; flex-wrap:wrap; gap:8px; }
+  .chip { padding:9px 14px; border-radius:20px; font-size:14px; line-height:1.2;
+    border:1.5px solid var(--line); background:#fff; color:var(--slate-soft); font-weight:450; }
+  .chip.on { border-color:var(--slate); background:var(--slate); color:#fff; font-weight:600; }
+  input[type=text], input[type=password], input[type=date], select, textarea.small {
+    width:100%; border:1.5px solid var(--line); border-radius:12px; padding:11px 13px;
+    font-size:15px; color:var(--ink); background:#fff; font-family:inherit; }
+  textarea.small { resize:vertical; min-height:54px; }
+  input[type=date] { width:auto; }
+  .conf { display:flex; gap:8px; align-items:center; }
+  .conf .n { width:44px; height:44px; border-radius:22px; font-size:16px; font-weight:700;
+    border:1.5px solid var(--line); background:#fff; color:var(--slate-soft); }
+  .conf .n.on { border-color:var(--slate); background:var(--slate); color:#fff; }
+  .conf .lbl { font-size:12px; color:var(--slate-soft); }
+  .saved { text-align:center; }
+  .saved .check { font-size:44px; margin:26px 0 8px; }
+  .saved h2 { font-family:'Archivo',sans-serif; font-weight:800; font-size:20px; color:var(--slate); margin:0; }
+  .saved p { font-size:14px; color:var(--slate-soft); }
+  .hint { font-size:14px; color:var(--slate-soft); margin:0 0 18px; line-height:1.5; }
+  .hidden { display:none !important; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline:2px solid var(--bus-deep); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>ALOP Meeting Log</h1>
+    <p>Talk it out. We'll fill in the form.</p>
+  </header>
+  <main>
+
+    <!-- PASSCODE GATE (first run only) -->
+    <section id="view-gate" class="hidden">
+      <div class="card">
+        <h2>One-time setup</h2>
+        <p class="hint" style="margin-bottom:12px">Enter the team passcode from your coordinator welcome text. You'll only do this once on this phone.</p>
+        <input type="password" id="gateToken" placeholder="Team passcode" autocomplete="off">
+        <div class="row">
+          <button id="gateBtn" class="btn btn-primary">Save &amp; start</button>
+        </div>
+        <div id="gateErr" class="err hidden"></div>
+      </div>
+    </section>
+
+    <!-- CAPTURE -->
+    <section id="view-capture" class="hidden">
+      <div class="card">
+        <h2>Just finished a meeting? Tell me about it.</h2>
+        <textarea id="recap" placeholder='Tap the Speak button (or the mic on your keyboard) and talk:&#10;&#10;"Met with the principal and a counselor at East Leyden this morning, scheduled check-in, went mostly positive. They raised a transportation issue for two students. I&#39;m sending the new referral flowchart by Friday. Relationship&#39;s a solid 4. This is Emily."'></textarea>
+        <div class="row">
+          <button id="micBtn" class="btn btn-mic"><span class="dot"></span><span id="micLabel">Speak</span></button>
+          <button id="parseBtn" class="btn btn-primary">Fill in the form &rarr;</button>
+        </div>
+        <div id="micTip" class="tip hidden"></div>
+      </div>
+      <div id="captureErr" class="err hidden"></div>
+    </section>
+
+    <!-- REVIEW -->
+    <section id="view-review" class="hidden">
+      <p class="hint">Here's what I caught. Fix anything that's off, fill the <b style="color:var(--warn)">needs you</b> bits, then save.</p>
+      <div id="fields"></div>
+      <div id="reviewErr" class="err hidden"></div>
+      <div class="row" style="padding-bottom:30px">
+        <button id="backBtn" class="btn btn-ghost">&larr; Recap</button>
+        <button id="saveBtn" class="btn btn-save">Save entry</button>
+      </div>
+    </section>
+
+    <!-- SAVED -->
+    <section id="view-saved" class="hidden saved">
+      <div class="check">&#10003;</div>
+      <h2>Logged.</h2>
+      <p id="savedSummary"></p>
+      <button id="againBtn" class="btn btn-primary" style="width:100%">Log another meeting</button>
+      <p class="tip" style="text-align:left; margin-top:24px">Your entry is now a row in the shared Sheet — leadership sees it instantly.</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ====== SETUP: paste your Apps Script Web app URL between the quotes ======
+  var SCRIPT_URL = "https://script.google.com/a/macros/west40.org/s/AKfycbwmHZQn4MC6vWn-ZOPJatubPVscPpwqfbiYW3goZqGGTHYBEcNNeukz0SJkBm7c04Y_Ow/exec";
+  // ==========================================================================
+
+  var VOCAB = {
+    coordinators: ["Angela","Alex","Ben","Emily","Nate","Sandra"],
+    schools: ["RHS","MMS","OPRF","Hester","East Leyden","West Leyden","Scott","EPHS","Roy","Elm Middle School","Union Ridge","Westdale","Pennoyer","John Mills","Elmwood Elem","D41 Elem","District Office"],
+    meetingTypes: ["Scheduled check-in","Relationship-building / intro","Problem-solving / concern","Program planning","Student-specific conversation","Family Night / event","Pop-in / unscheduled","Other"],
+    roles: ["Principal","Assistant Principal","Dean","Counselor / Social Worker","Student Support Team","Superintendent / District Admin","Teacher","Parent / Guardian","Other"],
+    tones: ["Very positive","Mostly positive","Neutral / mixed","Mostly negative","Very negative"],
+    concernCats: ["Student behavior","Staffing / scheduling","Referral process","Caseload capacity","Communication breakdown","Resource / funding","Logistical","Student support coordination","Family / community","Other"],
+    positives: ["Strong engagement / buy-in","Staff expressed appreciation","Student progress noted","Clear next steps identified","Improved relationship / trust","Program expansion opportunity","Specific advocate named","None this time"]
+  };
+  var entry = null;
+  var REQUIRED = ["coordinator","school","meetingTypes","roles","tone","confidence","concernsRaised"];
+
+  function $(id){ return document.getElementById(id); }
+  function show(id){ ["view-gate","view-capture","view-review","view-saved"].forEach(function(v){
+    $(v).classList.toggle("hidden", v !== id); }); window.scrollTo(0,0); }
+  function esc(s){ var d=document.createElement("div"); d.textContent=s==null?"":String(s); return d.innerHTML; }
+  function getToken(){ try { return localStorage.getItem("alop-token") || ""; } catch(e){ return ""; } }
+
+  // ---------- API ----------
+  function api(payload, onOk, onErr){
+    payload.token = getToken();
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data && data.ok) onOk(data);
+      else onErr((data && data.error) || "Something went wrong — try again.");
+    })
+    .catch(function(){ onErr("Couldn't reach the server — check your connection and try again."); });
+  }
+
+  // ---------- Gate ----------
+  $("gateBtn").onclick = function(){
+    var t = $("gateToken").value.trim();
+    var err = $("gateErr"); err.classList.add("hidden");
+    if (!t){ err.textContent = "Enter the passcode."; err.classList.remove("hidden"); return; }
+    try { localStorage.setItem("alop-token", t); } catch(e){}
+    show("view-capture");
+  };
+
+  // ---------- Mic ----------
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null, listening = false;
+  function micFail(msg){
+    $("micBtn").classList.add("hidden");
+    var tip = $("micTip"); tip.classList.remove("hidden");
+    tip.innerHTML = msg || "&#127908; The Speak button isn't supported in this browser &mdash; tap the text box, then the <b>mic key on your keyboard</b> instead.";
+  }
+  if (!SR) micFail();
+  $("micBtn").onclick = function(){
+    if (listening){ rec && rec.stop(); return; }
+    try {
+      rec = new SR();
+      rec.continuous = true; rec.interimResults = false; rec.lang = "en-US";
+      rec.onresult = function(e){
+        var add = "";
+        for (var i = e.resultIndex; i < e.results.length; i++)
+          if (e.results[i].isFinal) add += e.results[i][0].transcript + " ";
+        if (add) $("recap").value = ($("recap").value + " " + add).trim();
+      };
+      rec.onend = function(){ listening = false; setMicUI(); };
+      rec.onerror = function(ev){
+        listening = false; setMicUI();
+        if (ev.error === "not-allowed" || ev.error === "service-not-allowed")
+          micFail("&#127908; Microphone permission is blocked. Tap the lock icon by the address bar to allow it &mdash; or use the <b>mic key on your keyboard</b>.");
+      };
+      rec.start(); listening = true; setMicUI();
+    } catch(e){ micFail(); }
+  };
+  function setMicUI(){
+    $("micBtn").classList.toggle("live", listening);
+    $("micLabel").textContent = listening ? "Stop" : "Speak";
+  }
+
+  // ---------- Parse ----------
+  $("parseBtn").onclick = function(){
+    var text = $("recap").value.trim();
+    var err = $("captureErr"); err.classList.add("hidden");
+    if (!text){ err.textContent = "Say or type your recap first."; err.classList.remove("hidden"); return; }
+    if (listening && rec) rec.stop();
+    $("parseBtn").disabled = true; $("parseBtn").textContent = "Reading your recap…";
+    api({ action: "parse", transcript: text },
+      function(data){
+        $("parseBtn").disabled = false; $("parseBtn").textContent = "Fill in the form \u2192";
+        entry = normalize(data.parsed); renderReview(); show("view-review");
+      },
+      function(msg){
+        $("parseBtn").disabled = false; $("parseBtn").textContent = "Fill in the form \u2192";
+        err.textContent = msg; err.classList.remove("hidden");
+        if (/passcode/i.test(msg)) { try { localStorage.removeItem("alop-token"); } catch(e){} show("view-gate"); }
+      });
+  };
+
+  function normalize(p){
+    p = p || {};
+    return {
+      coordinator: p.coordinator || null,
+      date: p.date || new Date().toISOString().slice(0,10),
+      school: p.school || null,
+      meetingTypes: p.meetingTypes || [],
+      roles: p.roles || [],
+      attendeeNames: p.attendeeNames || "",
+      tone: p.tone || null,
+      confidence: p.confidence || null,
+      concernsRaised: (p.concernsRaised === true || p.concernsRaised === false) ? p.concernsRaised : null,
+      concernCats: p.concernCats || [],
+      concernDetail: p.concernDetail || "",
+      commitments: p.commitments || "",
+      positives: p.positives || [],
+      advocateName: p.advocateName || "",
+      notes: p.notes || ""
+    };
+  }
+
+  // ---------- Review UI ----------
+  function field(label, key, inner, needs){
+    return '<div class="field"><div class="label"><span class="t">' + label + '</span>' +
+      (needs ? '<span class="needs">needs you</span>' : '') + '</div>' + inner + '</div>';
+  }
+  function chips(key, options, multi){
+    return '<div class="chips">' + options.map(function(o){
+      var on = multi ? entry[key].indexOf(o) >= 0 : entry[key] === o;
+      return '<button type="button" class="chip' + (on ? ' on' : '') + '" data-k="' + esc(key) +
+        '" data-v="' + esc(o) + '" data-m="' + (multi?1:0) + '">' + esc(o) + '</button>';
+    }).join('') + '</div>';
+  }
+  function isMissing(key){
+    if (key === "concernsRaised") return entry.concernsRaised === null;
+    var v = entry[key];
+    return v === null || (Array.isArray(v) && v.length === 0);
+  }
+  function renderReview(){
+    var h = "";
+    h += field("Coordinator","coordinator", chips("coordinator", VOCAB.coordinators, false), isMissing("coordinator"));
+    h += field("Date","date",'<input type="date" id="f-date" value="' + esc(entry.date) + '">', !entry.date);
+    h += field("School / District","school",
+      '<select id="f-school"><option value="">Choose a school…</option>' +
+      VOCAB.schools.map(function(s){ return '<option' + (entry.school===s?' selected':'') + '>' + esc(s) + '</option>'; }).join('') +
+      '</select>', isMissing("school"));
+    h += field("Meeting type","meetingTypes", chips("meetingTypes", VOCAB.meetingTypes, true), isMissing("meetingTypes"));
+    h += field("Who you met with","roles", chips("roles", VOCAB.roles, true), isMissing("roles"));
+    h += field("Their names (optional)","attendeeNames",
+      '<input type="text" id="f-names" placeholder="e.g. Principal Ortiz, Ms. Daly" value="' + esc(entry.attendeeNames) + '">');
+    h += field("Overall tone","tone", chips("tone", VOCAB.tones, false), isMissing("tone"));
+    h += field("Relationship confidence","confidence",
+      '<div class="conf"><span class="lbl">At-risk</span>' +
+      [1,2,3,4,5].map(function(n){ return '<button type="button" class="n' + (entry.confidence===n?' on':'') + '" data-conf="' + n + '">' + n + '</button>'; }).join('') +
+      '<span class="lbl">Excellent</span></div>', isMissing("confidence"));
+    h += field("Concerns raised?","concernsRaised",
+      '<div class="chips">' + ["Yes","No"].map(function(o){
+        var on = (entry.concernsRaised === true && o==="Yes") || (entry.concernsRaised === false && o==="No");
+        return '<button type="button" class="chip' + (on?' on':'') + '" data-cr="' + o + '">' + o + '</button>';
+      }).join('') + '</div>', isMissing("concernsRaised"));
+    if (entry.concernsRaised === true){
+      h += field("What kind?","concernCats", chips("concernCats", VOCAB.concernCats, true), entry.concernCats.length===0);
+      h += field("In a sentence","concernDetail",
+        '<textarea class="small" id="f-cdetail" placeholder="What happened, briefly">' + esc(entry.concernDetail) + '</textarea>');
+    }
+    h += field("Commitments / follow-ups","commitments",
+      '<textarea class="small" id="f-commit" placeholder="What was promised, by whom, by when">' + esc(entry.commitments) + '</textarea>');
+    h += field("Positive takeaways","positives", chips("positives", VOCAB.positives, true));
+    if (entry.positives.indexOf("Specific advocate named") >= 0){
+      h += field("Advocate's name","advocateName",
+        '<input type="text" id="f-adv" placeholder="Who&#39;s championing the program?" value="' + esc(entry.advocateName) + '">');
+    }
+    h += field("Anything else","notes",
+      '<textarea class="small" id="f-notes" placeholder="Quotes, context, things to remember">' + esc(entry.notes) + '</textarea>');
+    $("fields").innerHTML = h;
+    bindReview(); updateSaveBtn();
+  }
+  function bindReview(){
+    $("fields").querySelectorAll(".chip[data-k]").forEach(function(b){
+      b.onclick = function(){
+        var k = b.dataset.k, v = b.dataset.v, multi = b.dataset.m === "1";
+        syncTexts();
+        if (multi){
+          var i = entry[k].indexOf(v);
+          if (i >= 0) entry[k].splice(i,1); else entry[k].push(v);
+        } else entry[k] = (entry[k] === v) ? null : v;
+        renderReview();
+      };
+    });
+    $("fields").querySelectorAll("[data-conf]").forEach(function(b){
+      b.onclick = function(){ syncTexts(); entry.confidence = Number(b.dataset.conf); renderReview(); };
+    });
+    $("fields").querySelectorAll("[data-cr]").forEach(function(b){
+      b.onclick = function(){ syncTexts(); entry.concernsRaised = b.dataset.cr === "Yes"; renderReview(); };
+    });
+    var sch = $("f-school"); if (sch) sch.onchange = function(){ entry.school = sch.value || null; updateSaveBtn(); };
+    var dt = $("f-date"); if (dt) dt.onchange = function(){ entry.date = dt.value; updateSaveBtn(); };
+  }
+  function syncTexts(){
+    if ($("f-names")) entry.attendeeNames = $("f-names").value;
+    if ($("f-cdetail")) entry.concernDetail = $("f-cdetail").value;
+    if ($("f-commit")) entry.commitments = $("f-commit").value;
+    if ($("f-adv")) entry.advocateName = $("f-adv").value;
+    if ($("f-notes")) entry.notes = $("f-notes").value;
+  }
+  function requiredMissing(){
+    for (var i=0;i<REQUIRED.length;i++) if (isMissing(REQUIRED[i])) return true;
+    if (entry.concernsRaised === true && entry.concernCats.length === 0) return true;
+    return false;
+  }
+  function updateSaveBtn(){
+    var b = $("saveBtn"), bad = requiredMissing();
+    b.disabled = bad;
+    b.textContent = bad ? "Fill the highlighted fields" : "Save entry";
+  }
+
+  // ---------- Save ----------
+  $("saveBtn").onclick = function(){
+    syncTexts();
+    if (requiredMissing()){ updateSaveBtn(); return; }
+    var err = $("reviewErr"); err.classList.add("hidden");
+    $("saveBtn").disabled = true; $("saveBtn").textContent = "Saving…";
+    api({ action: "save", entry: entry, transcript: $("recap").value },
+      function(){
+        $("savedSummary").textContent = entry.school + " · " + entry.tone + " · confidence " + entry.confidence + "/5";
+        show("view-saved");
+        $("saveBtn").disabled = false; $("saveBtn").textContent = "Save entry";
+      },
+      function(msg){
+        $("saveBtn").disabled = false; updateSaveBtn();
+        err.textContent = msg; err.classList.remove("hidden");
+      });
+  };
+
+  $("backBtn").onclick = function(){ syncTexts(); show("view-capture"); };
+  $("againBtn").onclick = function(){ entry = null; $("recap").value = ""; show("view-capture"); };
+
+  // ---------- Boot ----------
+  show(getToken() ? "view-capture" : "view-gate");
+</script>
+</body>
+</html>
